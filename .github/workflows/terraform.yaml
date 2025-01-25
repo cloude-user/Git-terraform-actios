@@ -26,10 +26,11 @@ jobs:
       id: aws-credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
-        aws-region: ${{ secrets.AWS_REGION }}
-        role-to-assume: ${{ secrets.AWS_ROLE_ARN }}  # Use the ARN stored in GitHub secrets
+        aws-region: ${{ secrets.AWS_REGION }}  # AWS region from secrets or define directly
+        role-to-assume: ${{ secrets.AWS_ROLE_ARN }}  # ARN of the role to assume
         role-session-name: TerraformSession
         audience: sts.amazonaws.com
+
 
     - name: Verify AWS Credentials
       run: aws sts get-caller-identity
