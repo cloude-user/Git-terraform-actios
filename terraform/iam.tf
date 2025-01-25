@@ -14,6 +14,22 @@ resource "aws_iam_role" "cloud_execution_role" {
   })
 }
 
+resource "aws_iam_policy" "lambda_s3_access_policy" {
+  name = "lambda_s3_access_policy"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["s3:GetObject"]
+        Resource = "arn:aws:s3:::sundeep43-lambda-storage001/*"
+      }
+    ]
+  })
+}
+
+
 # IAM policy for Lambda execution
 resource "aws_iam_policy" "cloud_execution_policy" {
   name        = "cloud_execution_policy"
@@ -35,4 +51,9 @@ resource "aws_iam_policy" "cloud_execution_policy" {
 resource "aws_iam_role_policy_attachment" "cloud_execution_attachment" {
   role       = aws_iam_role.cloud_execution_role.name
   policy_arn = aws_iam_policy.cloud_execution_policy.arn
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_s3_attachment" {
+  role       = aws_iam_role.cloud_execution_role.name
+  policy_arn = aws_iam_policy.lambda_s3_access_policy.arn
 }
