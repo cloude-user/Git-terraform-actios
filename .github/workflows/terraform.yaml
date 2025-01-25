@@ -4,12 +4,14 @@ on:
   push:
     branches:
       - '**'  # Trigger on push to any branch
-  pull_request:
-    types: [synchronize]  # Trigger on pull request updates (synchronization)
+  # pull_request:
+  #   types: [synchronize]  # Trigger on pull request updates
 
 jobs:
   terraform:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # Allow GitHub Actions to request an ID token
 
     steps:
     - name: Checkout Repository
@@ -24,49 +26,17 @@ jobs:
       id: aws-credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
-        aws-region: ${{ vars.DEFAULT_REGION }}  # Using GitHub variable for AWS region
-        role-to-assume: ${{ vars.DEPLOY_ROLE }}  # Using GitHub variable for IAM role ARN
+        aws-region: ${{ secrets.AWS_REGION }}
+        role-to-assume: ${{ secrets.AWS_ROLE_ARN }}  # Use the ARN stored in GitHub secrets
         role-session-name: TerraformSession
         audience: sts.amazonaws.com
 
     - name: Verify AWS Credentials
       run: aws sts get-caller-identity
 
-    - name: Initialize Terraform
-      id: terraform-init
+    # Continue with Terraform commands
+    - name: Terraform Init
       run: terraform init
 
-    - name: Validate Terraform
-      id: terraform-validate
-      run: terraform validate
-
-    - name: Format Terraform Code
-      id: terraform-fmt
-      run: terraform fmt -check
-
-    - name: Terraform Plan
-      id: terraform-plan
-      run: terraform plan -out=tfplan
-      env:
-        TF_LOG: INFO
-
-    - name: Check if tfplan exists
-      run: ls -al tfplan
-
-    - name: Show Terraform Plan Output (without jq)
-      run: terraform show -json tfplan
-
-    - name: Show Terraform Plan Output with jq
-      run: |
-        terraform show -json tfplan | jq || echo "jq failed to parse the output"
-
     - name: Terraform Apply
-      if: github.ref == 'refs/heads/main'
-      id: terraform-apply
-      run: terraform apply -auto-approve tfplan
-      env:
-        TF_LOG: INFO
-
-    - name: Show Terraform Outputs
-      if: github.ref == 'refs/heads/main'
-      run: terraform output -json | jq
+      run: terraform apply -auto-approve
