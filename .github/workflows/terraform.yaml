@@ -1,12 +1,11 @@
-name: Terraform CI/CD
+name: Terraform CI/CD Pipeline
 
 on:
   push:
     branches:
-      - main
+      - '**'  # Trigger on push to any branch
   pull_request:
-    branches:
-      - main
+    types: [synchronize]  # Trigger on pull request updates (synchronization)
 
 jobs:
   terraform:
@@ -21,25 +20,27 @@ jobs:
       with:
         terraform_version: 1.5.0
 
-    - name: Login to AWS
-      id: aws-login
+    - name: Configure AWS Credentials
+      id: aws-credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
-        aws-region: ${{ vars.DEFAULT_REGION }}
-        role-to-assume: ${{ vars.DEPLOY_ROLE }}
-        role-session-name: TerraformPlan
+        aws-region: ${{ vars.DEFAULT_REGION }}  # Using GitHub variable for AWS region
+        role-to-assume: ${{ vars.DEPLOY_ROLE }}  # Using GitHub variable for IAM role ARN
+        role-session-name: TerraformSession
         audience: sts.amazonaws.com
 
     - name: Verify AWS Credentials
       run: aws sts get-caller-identity
-      env:
-        AWS_REGION: ${{ vars.DEFAULT_REGION }}
-    
+
     - name: Initialize Terraform
       id: terraform-init
       run: terraform init
 
-    - name: Terraform Format Check
+    - name: Validate Terraform
+      id: terraform-validate
+      run: terraform validate
+
+    - name: Format Terraform Code
       id: terraform-fmt
       run: terraform fmt -check
 
@@ -47,18 +48,24 @@ jobs:
       id: terraform-plan
       run: terraform plan -out=tfplan
       env:
-        TF_LOG: DEBUG
+        TF_LOG: INFO
 
-    - name: Show Terraform Plan Outputs
-      if: always()
-      run: terraform show -json tfplan | jq
-      env:
-        TF_LOG: DEBUG
+    - name: Check if tfplan exists
+      run: ls -al tfplan
+
+    - name: Show Terraform Plan Output (without jq)
+      run: terraform show -json tfplan
+
+    - name: Show Terraform Plan Output with jq
+      run: |
+        terraform show -json tfplan | jq || echo "jq failed to parse the output"
 
     - name: Terraform Apply
       if: github.ref == 'refs/heads/main'
       id: terraform-apply
       run: terraform apply -auto-approve tfplan
+      env:
+        TF_LOG: INFO
 
     - name: Show Terraform Outputs
       if: github.ref == 'refs/heads/main'
