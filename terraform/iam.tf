@@ -16,7 +16,7 @@ resource "aws_iam_role" "cloud_execution_role" {
 
 # IAM policy for Lambda execution
 resource "aws_iam_policy" "cloud_execution_policy" {
-  name        = "lambda_execution_policy"
+  name        = "cloud_execution_policy"
   description = "Policy for Lambda to access resources"
 
   policy = jsonencode({
