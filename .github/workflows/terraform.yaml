@@ -10,36 +10,27 @@ on:
 jobs:
   terraform:
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write  # Allow GitHub Actions to request an ID token
-
+    
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Set up Terraform
-      uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_version: 1.5.0
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-2  # or use GitHub Secrets
+          role-to-assume: arn:aws:iam::692859915147:role/sundeep  # Replace with your role ARN
+          role-session-name: TerraformSession
+          audience: sts.amazonaws.com
 
-    - name: Configure AWS Credentials
-      id: aws-credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-region: us-east-2  # AWS region from secrets or define directly
-        role-to-assume: arn:aws:iam::692859915147:role/sundeep  # ARN of the role to assume
-        role-session-name: TerraformSession
-        audience: sts.amazonaws.com
-      
-    - name: Change Directory to Terraform
-      run: cd terraform 
+      - name: Change Directory to Terraform
+        run: cd terraform  # Navigate to the terraform folder where your .tf files are
 
-    - name: Verify AWS Credentials
-      run: aws sts get-caller-identity
+      - name: Terraform Init
+        run: terraform init
+        working-directory: terraform  # Ensure init is run in the correct directory
 
-    # Continue with Terraform commands
-    - name: Terraform Init
-      run: terraform init
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+        working-directory: terraform  # Ensure apply is run in the correct directory
 
-    - name: Terraform Apply
-      run: terraform apply -auto-approve
