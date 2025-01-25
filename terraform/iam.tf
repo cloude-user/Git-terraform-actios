@@ -1,5 +1,5 @@
 # IAM role for Lambda execution
-resource "aws_iam_role" "lambda_execution_role" {
+resource "aws_iam_role" "cloud_execution_role" {
   name = "lambda_execution_role"
 
   assume_role_policy = jsonencode({
@@ -15,7 +15,7 @@ resource "aws_iam_role" "lambda_execution_role" {
 }
 
 # IAM policy for Lambda execution
-resource "aws_iam_policy" "lambda_execution_policy" {
+resource "aws_iam_policy" "cloud_execution_policy" {
   name        = "lambda_execution_policy"
   description = "Policy for Lambda to access resources"
 
@@ -32,7 +32,7 @@ resource "aws_iam_policy" "lambda_execution_policy" {
 }
 
 # Attach the policy to the role
-resource "aws_iam_role_policy_attachment" "lambda_execution_attachment" {
-  role       = aws_iam_role.lambda_execution_role.name
-  policy_arn = aws_iam_policy.lambda_execution_policy.arn
+resource "aws_iam_role_policy_attachment" "cloud_execution_attachment" {
+  role       = aws_iam_role.cloud_execution_role.name
+  policy_arn = aws_iam_policy.cloud_execution_policy.arn
 }
