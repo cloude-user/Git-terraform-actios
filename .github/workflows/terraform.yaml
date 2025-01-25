@@ -1,0 +1,65 @@
+name: Terraform CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.5.0
+
+    - name: Login to AWS
+      id: aws-login
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-region: ${{ vars.DEFAULT_REGION }}
+        role-to-assume: ${{ vars.DEPLOY_ROLE }}
+        role-session-name: TerraformPlan
+        audience: sts.amazonaws.com
+
+    - name: Verify AWS Credentials
+      run: aws sts get-caller-identity
+      env:
+        AWS_REGION: ${{ vars.DEFAULT_REGION }}
+    
+    - name: Initialize Terraform
+      id: terraform-init
+      run: terraform init
+
+    - name: Terraform Format Check
+      id: terraform-fmt
+      run: terraform fmt -check
+
+    - name: Terraform Plan
+      id: terraform-plan
+      run: terraform plan -out=tfplan
+      env:
+        TF_LOG: DEBUG
+
+    - name: Show Terraform Plan Outputs
+      if: always()
+      run: terraform show -json tfplan | jq
+      env:
+        TF_LOG: DEBUG
+
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/main'
+      id: terraform-apply
+      run: terraform apply -auto-approve tfplan
+
+    - name: Show Terraform Outputs
+      if: github.ref == 'refs/heads/main'
+      run: terraform output -json | jq
