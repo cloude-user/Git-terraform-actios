@@ -30,7 +30,9 @@ jobs:
         role-to-assume: arn:aws:iam::692859915147:role/sundeep  # ARN of the role to assume
         role-session-name: TerraformSession
         audience: sts.amazonaws.com
-
+      
+    - name: Change Directory to Terraform
+      run: cd terraform 
 
     - name: Verify AWS Credentials
       run: aws sts get-caller-identity
