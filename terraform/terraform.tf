@@ -10,10 +10,6 @@ terraform{
 # main.tf
 provider "aws" {
   region = var.region
-
-  assume_role {
-    role_arn = join("", ["arn:aws:iam::", var.account_id, ":role/terraform-", "-infra-deploy-role"])
-  }
 }
 
 
