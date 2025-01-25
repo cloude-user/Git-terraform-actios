@@ -16,11 +16,11 @@
 # }
 
 resource "aws_lambda_function" "tony" {
-  function_name    = "siuuu"
-  runtime          = "python3.9"
-  role             = aws_iam_role.cloud_execution_role.arn
-  handler          = "lambda.handler"
-  filename         = "src/lambdas/lambda-package.zip"
+  function_name = "siuuu"
+  runtime       = "python3.9"
+  role          = aws_iam_role.cloud_execution_role.arn
+  handler       = "lambda.handler"
+  filename      = "../src/lambdas/lambda-package.zip"
   environment {
     variables = {
       ENV_VAR1 = "Siuu"
