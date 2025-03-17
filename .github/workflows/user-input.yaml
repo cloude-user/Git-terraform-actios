@@ -2,10 +2,10 @@ name: User Input Workflow
 
 on:
   workflow_dispatch:
-    inputs:
-      user_input:
-        description: 'Enter a number between 1-10'
-        required: true
+    # inputs:
+    #   user_input:
+    #     description: 'Enter a number between 1-10'
+    #     required: true
 
 jobs:
   display-message:
