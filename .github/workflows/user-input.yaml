@@ -6,7 +6,6 @@ on:
       user_input:
         description: 'Enter a number between 1-10'
         required: true
-        default: '5'
 
 jobs:
   display-message:
