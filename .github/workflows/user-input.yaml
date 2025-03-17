@@ -1,0 +1,30 @@
+name: User Input Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      user_input:
+        description: 'Enter a number between 1-10'
+        required: true
+        default: '5'
+
+jobs:
+  display-message:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo "Welcome"
+        run: |
+          echo "Welcome to Siuu"
+
+      - name: Check Trigger Event
+        run: |
+          echo "Triggered by: ${{ github.event_name }}"
+
+      - name: Display User Input
+        run: |
+          echo "User entered: ${{ inputs.user_input }}"
+
+      # Optional: Pass input to a Python script
+      - name: Run Python Script with User Input
+        run: |
+          python script.py ${{ inputs.user_input }}
