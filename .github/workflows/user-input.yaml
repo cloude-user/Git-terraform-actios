@@ -2,14 +2,16 @@ name: User Input Workflow
 
 on:
   workflow_dispatch:
-    # inputs:
-    #   user_input:
-    #     description: 'Enter a number between 1-10'
-    #     required: true
+    inputs:
+      user_input:
+        description: 'Enter a number between 1-10'
+        required: true
+        default: '5'
 
 jobs:
   display-message:
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/Feature'  # Change 'feature' to your branch name
     steps:
       - name: Echo "Welcome"
         run: |
